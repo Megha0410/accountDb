@@ -1,8 +1,9 @@
 package com.app.accountdb.service;
 
-import java.util.List;
+
 import java.util.Optional;
 import java.util.Set;
+
 
 import javax.sql.DataSource;
 
@@ -26,10 +27,16 @@ public class AccountService {
 		if(accountOp.isPresent()) {
 			account = accountOp.get();
 		}
-		Set<Statement> statement = null;
-		if(account!= null)
-		 statement= account.getStatements();
-		return statement;
+		Set<Statement> statements = null;
+		if(account!= null) {
+		 statements= account.getStatements();
+		 for(Statement s: statements) {
+			 int ide= s.getId();
+			 int maskId = ide << 4;
+			 s.setId(maskId);
+		 }
+		}
+		return statements;
 		
 	}
 }

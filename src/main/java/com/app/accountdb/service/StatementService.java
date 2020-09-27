@@ -7,9 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 import javax.sql.DataSource;
 
@@ -31,11 +29,12 @@ public class StatementService {
 		List<Statement> statements = statementRepo.findAll();
 		Float fromAmt = Float.valueOf(fromAmount);
 		Float toAmt = Float.valueOf(toAmount);
-		List<Statement> filteredList = new ArrayList();
+		List<Statement> filteredList = new ArrayList<Statement>();
 		for(Statement s: statements) {
 			String amount = s.getAmount();
 			Float amt = Float.valueOf(amount);
 			if(amt.compareTo(fromAmt)==1 && amt.compareTo(toAmt) == -1) {
+				s.setId(maskInt(s.getId()));
 				filteredList.add(s);
 			}
 		}
@@ -44,7 +43,7 @@ public class StatementService {
 	
 	public List<Statement> getByDateRange(String fromDate, String toDate){
 		List<Statement> statements = statementRepo.findAll();
-		List<Statement> filtered = new ArrayList();
+		List<Statement> filtered = new ArrayList<Statement>();
 		fromDate = fromDate.replaceAll(".","-");
 		toDate = toDate.replaceAll(".","-");
 		SimpleDateFormat  s = new SimpleDateFormat("dd-MM-yyyy");
@@ -56,6 +55,7 @@ public class StatementService {
 				date = date.replaceAll(".", "-");
 				Date d = s.parse(date);
 				if(d.after(fDate) && d.before(tDate)) {
+					st.setId(maskInt(st.getId()));
 					filtered.add(st);
 				}
 			}
@@ -69,16 +69,21 @@ public class StatementService {
 	
 	public List<Statement> getStatement(){
 		List<Statement> statements =statementRepo.findAll();
-		List<Statement> filtered = new ArrayList();
+		List<Statement> filtered = new ArrayList<Statement>();
 		LocalDate date = LocalDate.now().minusMonths(6);
 		for(Statement s : statements) {
 			DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 			String de = s.getDatefield().replaceAll(".","-");
 			LocalDate ld = LocalDate.parse(de,format);
 			if(ld.isAfter(date)) {
+				s.setId(maskInt(s.getId()));
 				filtered.add(s);
 			}
 		}
 		return filtered;
+	}
+	
+	private int maskInt(int id) {
+		return id << 4;
 	}
 }
